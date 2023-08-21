@@ -1,59 +1,46 @@
-const tBody = document.getElementById("table-body");
-
-addNewRow =()=> {
-    const row = document.createElement("tr");
-    row.className = "single-row";
-    row.innerHTML = `<td><input type="text" placeholder="Product name" class="product" id="product"></td>
-                    <td><input type="number" placeholder="0" name="unit" class="unit" id="unit" onkeyup="getInput()"></td>
-                    <td><input type="number" placeholder="0" name="price" class="price" id="price" onkeyup="getInput()"></td>
-                    <td><input type="number" placeholder="0" name="amount" class="amount" id="amount" disabled></td>
-                    <td style="text-align: right;"><span class="material-icons" action="delete">delete_outline</span></td>`
-
-    tBody.insertBefore(row, tBody.lastElementChild.previousSibling);
-}
-
-document.getElementById("add-row").addEventListener("click", (e)=> {
-    e.preventDefault();
-    addNewRow();
-});
-
-//GET INPUTS, MULTIPLY AND GET THE ITEM PRICE
-getInput =()=> {
-    var rows = document.querySelectorAll("tr.single-row");
-    rows.forEach((currentRow) => {
-        var unit = currentRow.querySelector("#unit").value;
-        var price = currentRow.querySelector("#price").value;
-
-        amount = unit * price;
-        currentRow.querySelector("#amount").value = amount;
-        overallSum();
-
-    })
-};
-
-//Get the overall sum/Total
-overallSum =()=> {
-    var arr = document.getElementsByName("amount");
-    var total = 0;
-    for(var i = 0; i < arr.length; i++) {
-        if(arr[i].value) {
-            total += +arr[i].value;
-        }
-        document.getElementById("total").value = total;
+document.addEventListener("DOMContentLoaded", function () {
+    let rowCount = 1;
+    const addRowButton = document.querySelector(".add-row");
+    const calculateTotalButton = document.getElementById("calculate-total");
+    const invoiceTotal = document.getElementById("invoice-total");
+  
+    addRowButton.addEventListener("click", addRow);
+    calculateTotalButton.addEventListener("click", calculateTotal);
+  
+    function addRow() {
+      const table = document.querySelector("table");
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `
+        <td><button type="button" class="delete-row">Delete</button></td>
+        <td><input type="text" class="serial-no" /></td>
+        <td><input type="text" class="product-name" /></td>
+        <td><input type="number" class="quantity" /></td>
+        <td><input type="number" class="price" /></td>
+        <td><input type="text" class="total" readonly /></td>
+      `;
+      table.appendChild(newRow);
+      rowCount++;
     }
-}
-
-//Delete row from the table
-tBody.addEventListener("click", (e)=>{
-    let el = e.target;
-    const deleteROW = e.target.getAttribute("action");
-    if(deleteROW == "delete") {
-        delRow(el);
-        overallSum();
+  
+    function calculateTotal() {
+      let total = 0;
+      const rows = document.querySelectorAll("tr");
+      for (let i = 1; i < rows.length; i++) {
+        const quantity = parseFloat(rows[i].querySelector(".quantity").value);
+        const price = parseFloat(rows[i].querySelector(".price").value);
+        const rowTotal = quantity * price;
+        rows[i].querySelector(".total").value = rowTotal.toFixed(2);
+        total += rowTotal;
+      }
+      invoiceTotal.textContent = total.toFixed(2);
     }
-})
-
-//Target row and remove from DOM;
-delRow =(el)=> {
-    el.parentNode.parentNode.parentNode.removeChild(el.parentNode.parentNode);
-}
+  
+    document.addEventListener("click", function (e) {
+      if (e.target && e.target.classList.contains("delete-row")) {
+        const row = e.target.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+        calculateTotal();
+      }
+    });
+  });
+  
